@@ -1,0 +1,50 @@
+{
+  "name": "recallguard-mcp",
+  "version": "1.0.0",
+  "description": "RecallGuard MCP Server - Machine-to-machine recall screening via x402 on Base",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "recall",
+    "recallguard",
+    "x402",
+    "base",
+    "usdc",
+    "cpsc",
+    "fda",
+    "nhtsa",
+    "monetize",
+    "securefastmcp"
+  ],
+  "author": "Nano Empire AI",
+  "license": "MIT",
+  "files": [
+    "dist/**/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "tsx": "^4.16.0",
+    "vitest": "^2.0.0",
+    "eslint": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0"
+  }
+}

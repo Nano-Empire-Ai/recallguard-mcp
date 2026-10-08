@@ -1,0 +1,106 @@
+name: recallguard-mcp
+version: 1.0.0
+description: "RecallGuard MCP Server - Machine-to-machine recall screening via x402 on Base"
+homepage: https://github.com/roblambert9/recallguard-mcp
+repository:
+  type: git
+  url: https://github.com/roblambert9/recallguard-mcp
+license: MIT
+keywords:
+  - mcp
+  - model-context-protocol
+  - recall
+  - recallguard
+  - x402
+  - base
+  - usdc
+  - cpsc
+  - fda
+  - nhtsa
+  - monetize
+  - securefastmcp
+
+start:
+  command: node
+  args:
+    - dist/index.js
+  env:
+    - RECALLGUARD_BASE
+    - X402_PAY_TO
+
+config:
+  type: object
+  properties:
+    RECALLGUARD_BASE:
+      type: string
+      default: "https://recallguard-api.vercel.app"
+      description: "RecallGuard API base URL"
+    X402_PAY_TO:
+      type: string
+      default: "0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01"
+      description: "x402 payment recipient address (USDC on Base)"
+
+tools:
+  - name: health
+    description: "Check RecallGuard API health and x402 configuration"
+    inputSchema:
+      type: object
+      properties: {}
+      required: []
+
+  - name: feed
+    description: "Get recall feed with optional date filter and limit. Returns HTTP 402 if no valid trial token or x402 receipt provided. $0.05 USDC per call."
+    inputSchema:
+      type: object
+      properties:
+        since:
+          type: string
+          description: "ISO date string (YYYY-MM-DD) to fetch recalls since"
+        limit:
+          type: number
+          description: "Maximum number of recalls to return (1-100)"
+          minimum: 1
+          maximum: 100
+      required: []
+
+  - name: match
+    description: "Match inventory items against recall database. Returns HTTP 402 if no valid trial token or x402 receipt provided. $0.10 USDC per call."
+    inputSchema:
+      type: object
+      properties:
+        inventory:
+          type: array
+          description: "Array of inventory items to match against recalls"
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "Item name"
+              brand:
+                type: string
+                description: "Item brand"
+              upc:
+                type: string
+                description: "UPC code"
+              sku:
+                type: string
+                description: "SKU code"
+              category:
+                type: string
+                description: "Item category"
+            required:
+              - name
+          minItems: 1
+          maxItems: 500
+      required:
+        - inventory
+
+pricing:
+  type: per_call
+  currency: USDC
+  chain: base
+  rates:
+    health: 0
+    feed: 0.05
+    match: 0.10
