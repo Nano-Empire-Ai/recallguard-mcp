@@ -1,0 +1,15 @@
+# RecallGuard MCP (`recallguard-mcp`)
+
+> Canonical Machine Discovery Index: https://www.nanoempireai.com/llms.txt
+> A2A Agent Card (v1.5.0): https://www.nanoempireai.com/.well-known/agent-card.json
+> Poppy / PAP Manifest (PAP/1.0): https://www.nanoempireai.com/.well-known/poppy.json
+> MCP Manifest (2024-11-05): https://www.nanoempireai.com/.well-known/mcp.json
+> Commercial Offers (v1.4.0): https://www.nanoempireai.com/offers.json
+
+## Overview
+Production Model Context Protocol (MCP) server for screening products and inventory against 46,642 verified CPSC, FDA, and Health Canada recalls with HTTP 402 (`x402 v2`) micropayment settlement in USDC on Base Mainnet (`eip155:8453`).
+
+## Endpoints
+- `GET https://recallguard-api.vercel.app/api/v1/health` (Free)
+- `GET https://recallguard-api.vercel.app/api/v1/feed` ($0.05 USDC on Base Mainnet `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`)
+- `POST https://recallguard-api.vercel.app/api/v1/match` ($0.10 USDC on Base Mainnet `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`)

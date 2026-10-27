@@ -1,41 +1,30 @@
-# RecallGuard MCP Server
+# RecallGuard MCP Server (`recallguard-mcp`)
 
-**Machine-to-machine recall screening via x402 on Base**
+Model Context Protocol (MCP) server providing deterministic product recall screening against **46,642 verified US & Canadian government recall records** (`1,508` CPSC + `10,922` FDA + `34,212` Health Canada/CFIA/Transport Canada) with native `x402 v2` micropayment settlement on Base Mainnet (`USDC`).
 
-Production-ready MCP server providing recall screening for CPSC/FDA/NHTSA recalls with x402 micropayment settlement on Base (USDC).
+![Status: Live Production](https://img.shields.io/badge/status-live_production-10b981)
+![Smithery: Grade A Certified](https://img.shields.io/badge/Smithery-Grade_A_Certified-6366f1)
+![x402 Rail: Base Mainnet USDC](https://img.shields.io/badge/x402_Base_USDC-1_self--test_settled-3b82f6)
+![Outside Paying Customers: 0](https://img.shields.io/badge/outside_paying_customers-0-f59e0b)
+![License: MIT](https://img.shields.io/badge/license-MIT-64748b)
 
-## Features
+---
 
-- **Health Check** — Free endpoint to verify API status and x402 configuration
-- **Recall Feed** — Latest CPSC/FDA/NHTSA recalls with date filtering ($0.05 USDC/call)
-- **Inventory Matching** — Match inventory items against recall database ($0.10 USDC/call)
-
-## Quickstart
-
-### Installation
+## 1. Install & Run Today
 
 ```bash
-npm install recallguard-mcp
-# or
 npx recallguard-mcp
+# or install globally / locally
+npm install recallguard-mcp
 ```
 
-### Configuration
-
-```bash
-# Required environment variables
-RECALLGUARD_BASE=https://recallguard-api.vercel.app
-X402_PAY_TO=0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01
-```
-
-### Usage with MCP Client
-
+### Add to Claude Desktop / Cursor (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
     "recallguard": {
       "command": "npx",
-      "args": ["recallguard-mcp"],
+      "args": ["-y", "recallguard-mcp"],
       "env": {
         "RECALLGUARD_BASE": "https://recallguard-api.vercel.app",
         "X402_PAY_TO": "0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01"
@@ -45,171 +34,59 @@ X402_PAY_TO=0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01
 }
 ```
 
-## Available Tools
+---
 
-### `health` (Free)
-Check API health and x402 configuration.
+## 2. Machine-Readable Discovery Links
 
-```json
-{
-  "name": "health",
-  "arguments": {}
-}
-```
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "version": "1.0.0",
-  "timestamp": "2026-10-08T15:00:00.000Z",
-  "x402_configured": true
-}
-```
-
-### `feed` ($0.05 USDC/call via x402)
-
-Get recall feed with optional date filter and limit.
-
-```json
-{
-  "name": "feed",
-  "arguments": {
-    "since": "2026-01-01",
-    "limit": 50
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "ok": true,
-  "tier": "paid",
-  "count": 50,
-  "recalls": [
-    {
-      "recall_id": "24-123",
-      "title": "Product Recall: Toy Car Choking Hazard",
-      "hazard": "Choking hazard from small parts",
-      "remedy": "Return for full refund",
-      "date": "2026-01-15",
-      "url": "https://www.cpsc.gov/Recalls/2024/..."
-    }
-  ]
-}
-```
-
-### `match` ($0.10 USDC/call via x402)
-
-Match inventory items against recall database.
-
-```json
-{
-  "name": "match",
-  "arguments": {
-    "inventory": [
-      {
-        "name": "Toy Car",
-        "brand": "Fisher-Price",
-        "upc": "027084123456",
-        "sku": "FP-12345",
-        "category": "Toys"
-      }
-    ]
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "ok": true,
-  "tier": "paid",
-  "items_checked": 1,
-  "matches": [
-    {
-      "item": {
-        "name": "Toy Car",
-        "brand": "Fisher-Price",
-        "upc": "027084123456"
-      },
-      "recall_id": "24-123",
-      "severity": "HIGH",
-      "hazard": "Choking hazard from small parts",
-      "remedy": "Return for full refund",
-      "date": "2026-01-15"
-    }
-  ]
-}
-```
-
-## x402 Payment
-
-All paid endpoints require x402 payment via HTTP 402 challenge:
-
-1. Call tool without payment → Returns HTTP 402 with payment details
-2. Pay via x402 (USDC on Base)
-3. Retry with `X-402-Receipt` header
-
-**Pricing:**
-- `feed`: $0.05 USDC per call
-- `match`: $0.10 USDC per call
-
-**Settlement:** USDC on Base (Chain ID: 8453)
-**Asset:** USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)
-**Pay To:** 0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01
-
-## Trial Onramp
-
-New agents can claim 50 free credits:
-
-```bash
-# Claim trial
-curl -X POST https://www.nanoempireai.com/v1/trial \
-  -H "Content-Type: application/json" \
-  -d '{"agent_id": "my-agent-123"}'
-
-# Returns: {"trial_token": "trial_...", "credits": 50, "expires_at": 1728000000, "endpoints": ["/feed", "/match"]}
-
-# Use trial token
-curl -X POST https://www.nanoempireai.com/api/v1/feed \
-  -H "Authorization: Bearer trial_token_here" \
-  -H "Content-Type: application/json" \
-  -d '{"since": "2026-01-01", "limit": 10}'
-```
-
-## Smithery Deployment
-
-This server is deployed to Smithery at:
-- **Namespace:** `rob-c8hu`
-- **URL:** https://smithery.ai/servers/rob-c8hu/recallguard-mcp
-- **Grade:** A (Production Certified)
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Build
-npm run build
-
-# Development mode
-npm run dev
-
-# Run tests
-npm test
-
-# Lint
-npm run lint
-```
-
-## License
-
-MIT License - see LICENSE file for details.
+- **Canonical LLM Index (`llms.txt`):** [`https://www.nanoempireai.com/llms.txt`](https://www.nanoempireai.com/llms.txt)
+- **Live MCP Discovery Manifest:** [`https://www.nanoempireai.com/.well-known/mcp.json`](https://www.nanoempireai.com/.well-known/mcp.json)
+- **A2A Agent Card (`v1.5.0`):** [`https://www.nanoempireai.com/.well-known/agent-card.json`](https://www.nanoempireai.com/.well-known/agent-card.json)
+- **Poppy / PAP Manifest (`PAP/1.0`):** [`https://www.nanoempireai.com/.well-known/poppy.json`](https://www.nanoempireai.com/.well-known/poppy.json)
+- **Commercial Offers (`offers.json`):** [`https://www.nanoempireai.com/offers.json`](https://www.nanoempireai.com/offers.json)
+- **OpenAPI 3.1 Spec:** [`https://www.nanoempireai.com/.well-known/openapi.json`](https://www.nanoempireai.com/.well-known/openapi.json)
+- **Smithery Registry:** [`https://smithery.ai/servers/rob-c8hu/recallguard-mcp`](https://smithery.ai/servers/rob-c8hu/recallguard-mcp)
 
 ---
 
-**Nano Empire AI** — Building the autonomous machine economy.  
-https://nanoempireai.com | @nanoempireai
+## 3. Exposed MCP Tools & Pricing (`x402 v2` Base USDC + Stripe)
+
+- **Settlement Network:** Base Mainnet (`eip155:8453`)
+- **Asset:** USDC (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`)
+- **Pay-To Treasury:** `0x90E23A7b6F6494A879d05DDC4278D0e55Dec1e01`
+
+| Tool | Underlying Endpoint | Price | Description |
+|------|---------------------|-------|-------------|
+| **`health`** | `GET /api/v1/health` | **Free** | Verifies API status, dataset build timestamp (`2026-10-11T17:17:54Z`), and record count (`46,642`) |
+| **`feed`** | `GET /api/v1/feed` | **$0.05 USDC** (`50000` atomic) | Returns latest CPSC/FDA/Health Canada recall feed with date and limit filters |
+| **`match`** | `POST /api/v1/match` | **$0.10 USDC** (`100000` atomic) | Screens an array of inventory items (`name`, `brand`, `upc`, `sku`) against `46,642` recalls |
+
+- **Human / Enterprise Checkout (Stripe):** Single SKU Audit (**$30**) or Continuous Watchlist Pro (**$99/mo**) via [`offers.json`](https://www.nanoempireai.com/offers.json).
+
+---
+
+## 4. Settlement Proof & Honest Volume Ledger
+
+- **On-Chain Settlement Proof (Base Mainnet Block `51961194`):**
+  - **Tx Hash:** [`0x0581b819b2e5b481cbbcfb8fe81e6fe57a0d0ef9c6f8fc04952164761586da64`](https://basescan.org/tx/0x0581b819b2e5b481cbbcfb8fe81e6fe57a0d0ef9c6f8fc04952164761586da64)
+  - **Amount:** `0.05 USDC` (`50,000` atomic units) settled via EIP-3009 `TransferWithAuthorization` for `GET /api/v1/feed`.
+- **Epistemic Volume Disclosure:**
+  - **Self-test on-chain settlements:** `1` (`$0.05 USDC`)
+  - **Outside paying customers:** `0`
+  - **Outside settled volume:** `$0.00`
+
+---
+
+## 5. Development
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+---
+
+## 6. License & Contact
+
+- **License:** MIT
+- **Contact:** Robert Lambert (`rob@nanoempireai.com`) · [`https://www.nanoempireai.com`](https://www.nanoempireai.com)
